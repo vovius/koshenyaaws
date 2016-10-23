@@ -2,17 +2,20 @@ package com.crossover.trial.weather.server;
 
 import com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint;
 import com.crossover.trial.weather.rest.RestWeatherQueryEndpoint;
+import com.crossover.trial.weather.spring.ApplicationConfig;
+import org.apache.log4j.Logger;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.http.server.*;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 
 /**
@@ -23,11 +26,17 @@ import static java.lang.String.*;
  */
 public class WeatherServer {
 
-    private static final String BASE_URL = "http://localhost:9090/";
+    private final static Logger LOG = Logger.getLogger(WeatherServer.class);
 
-    public static void main(String[] args) {
+    @Value("${base_url}")
+    private String BASE_URL;
+
+    @Value("${messageServerStarted}")
+    private String MESSAGE_SERVER_STARTED;
+
+    public void init() {
         try {
-            System.out.println("Starting Weather App local testing server: " + BASE_URL);
+            LOG.info("Starting Weather App local testing server: " + BASE_URL);
 
             final ResourceConfig resourceConfig = new ResourceConfig();
             resourceConfig.register(RestWeatherCollectorEndpoint.class);
@@ -40,7 +49,7 @@ public class WeatherServer {
 
             HttpServerProbe probe = new HttpServerProbe.Adapter() {
                 public void onRequestReceiveEvent(HttpServerFilter filter, Connection connection, Request request) {
-                    System.out.println(request.getRequestURI());
+                    LOG.info(request.getRequestURI());
                 }
             };
             server.getServerConfiguration().getMonitoringConfig().getWebServerConfig().addProbes(probe);
@@ -48,13 +57,17 @@ public class WeatherServer {
 
             // the autograder waits for this output before running automated tests, please don't remove it
             server.start();
-            System.out.println(format("Weather Server started.\n url=%s\n", BASE_URL));
+            LOG.info(format(MESSAGE_SERVER_STARTED, BASE_URL));
 
             // blocks until the process is terminated
             Thread.currentThread().join();
             server.shutdown();
         } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(WeatherServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error(ex);
         }
+    }
+
+    public static void main(String[] args) {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(ApplicationConfig.class);
     }
 }
