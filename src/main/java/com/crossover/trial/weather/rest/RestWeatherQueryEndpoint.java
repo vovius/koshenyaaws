@@ -1,13 +1,13 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.rest;
 
+import com.crossover.trial.weather.data.AirportData;
+import com.crossover.trial.weather.data.AtmosphericInformation;
 import com.google.gson.Gson;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.logging.Logger;
-
-import static com.crossover.trial.weather.RestWeatherCollectorEndpoint.addAirport;
 
 /**
  * The Weather App REST endpoint allows clients to query, update and check health stats. Currently, all data is
@@ -21,16 +21,16 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
 
     /** earth radius in KM */
-    public static final double R = 6372.8;
+    private static final double R = 6372.8;
 
     /** shared gson json to object factory */
-    public static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     /** all known airports */
-    protected static List<AirportData> airportData = new ArrayList<>();
+    private static List<AirportData> airportData = new ArrayList<>();
 
     /** atmospheric information for each airport, idx corresponds with airportData */
-    protected static List<AtmosphericInformation> atmosphericInformation = new LinkedList<>();
+    private static List<AtmosphericInformation> atmosphericInformation = new LinkedList<>();
 
     /**
      * Internal performance counter to better understand most requested information, this map can be improved but
@@ -38,9 +38,13 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * we don't want to write this to disk, but will pull it off using a REST request and aggregate with other
      * performance metrics {@link #ping()}
      */
-    public static Map<AirportData, Integer> requestFrequency = new HashMap<AirportData, Integer>();
+    private static Map<AirportData, Integer> requestFrequency = new HashMap<AirportData, Integer>();
 
-    public static Map<Double, Integer> radiusFreq = new HashMap<Double, Integer>();
+    private static Map<Double, Integer> radiusFreq = new HashMap<Double, Integer>();
+
+    public static List<AtmosphericInformation> getAtmosphericInformation() {
+        return atmosphericInformation;
+    }
 
     static {
         init();
@@ -170,27 +174,31 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * @return the distance in KM
      */
     public double calculateDistance(AirportData ad1, AirportData ad2) {
-        double deltaLat = Math.toRadians(ad2.latitude - ad1.latitude);
-        double deltaLon = Math.toRadians(ad2.longitude - ad1.longitude);
-        double a =  Math.pow(Math.sin(deltaLat / 2), 2) + Math.pow(Math.sin(deltaLon / 2), 2)
-                * Math.cos(ad1.latitude) * Math.cos(ad2.latitude);
+        double deltaLat = Math.toRadians(ad2.getLatitude() - ad1.getLatitude());
+        double deltaLon = Math.toRadians(ad2.getLongitude() - ad1.getLongitude());
+        double a = Math.pow(Math.sin(deltaLat / 2), 2) + Math.pow(Math.sin(deltaLon / 2), 2)
+                * Math.cos(ad1.getLatitude()) * Math.cos(ad2.getLatitude());
         double c = 2 * Math.asin(Math.sqrt(a));
         return R * c;
+    }
+
+    public static List<AirportData> getAirportData() {
+        return airportData;
     }
 
     /**
      * A dummy init method that loads hard coded data
      */
-    protected static void init() {
+    public static void init() {
         airportData.clear();
         atmosphericInformation.clear();
         requestFrequency.clear();
 
-        addAirport("BOS", 42.364347, -71.005181);
-        addAirport("EWR", 40.6925, -74.168667);
-        addAirport("JFK", 40.639751, -73.778925);
-        addAirport("LGA", 40.777245, -73.872608);
-        addAirport("MMU", 40.79935, -74.4148747);
+        RestWeatherCollectorEndpoint.addAirport("BOS", 42.364347, -71.005181);
+        RestWeatherCollectorEndpoint.addAirport("EWR", 40.6925, -74.168667);
+        RestWeatherCollectorEndpoint.addAirport("JFK", 40.639751, -73.778925);
+        RestWeatherCollectorEndpoint.addAirport("LGA", 40.777245, -73.872608);
+        RestWeatherCollectorEndpoint.addAirport("MMU", 40.79935, -74.4148747);
     }
 
 }

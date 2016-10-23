@@ -1,4 +1,4 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.data;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -10,25 +10,25 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class DataPoint {
 
-    public double mean = 0.0;
+    private double mean;
 
-    public int first = 0;
+    private int first;
 
-    public int second = 0;
+    private int last;
 
-    public int third = 0;
+    private int median;
 
-    public int count = 0;
+    private int count;
 
     /** private constructor, use the builder to create this object */
     private DataPoint() { }
 
-    protected DataPoint(int first, int second, int mean, int third, int count) {
-        this.setFirst(first);
-        this.setMean(mean);
-        this.setSecond(second);
-        this.setThird(third);
-        this.setCount(count);
+    private DataPoint(Builder builder) {
+        this.first = builder.first;
+        this.last = builder.last;
+        this.median = builder.median;
+        this.mean = builder.mean;
+        this.count = builder.count;
     }
 
     /** the mean of the observations */
@@ -36,33 +36,33 @@ public class DataPoint {
         return mean;
     }
 
-    protected void setMean(double mean) { this.mean = mean; }
+    public void setMean(double mean) { this.mean = mean; }
 
     /** 1st quartile -- useful as a lower bound */
     public int getFirst() {
         return first;
     }
 
-    protected void setFirst(int first) {
+    public void setFirst(int first) {
         this.first = first;
     }
 
     /** 2nd quartile -- median value */
-    public int getSecond() {
-        return second;
+    public int getLast() {
+        return last;
     }
 
-    protected void setSecond(int second) {
-        this.second = second;
+    public void setLast(int last) {
+        this.last = last;
     }
 
     /** 3rd quartile value -- less noisy upper value */
-    public int getThird() {
-        return third;
+    public int getMedian() {
+        return median;
     }
 
-    protected void setThird(int third) {
-        this.third = third;
+    public void setMedian(int median) {
+        this.median = median;
     }
 
     /** the total number of measurements */
@@ -70,7 +70,7 @@ public class DataPoint {
         return count;
     }
 
-    protected void setCount(int count) {
+    public void setCount(int count) {
         this.count = count;
     }
 
@@ -83,41 +83,43 @@ public class DataPoint {
     }
 
     static public class Builder {
-        int first;
-        int mean;
-        int median;
-        int last;
-        int count;
+        private int mean;
+        private int first;
+        private int median;
+        private int last;
+        private int count;
 
         public Builder() { }
 
-        public Builder withFirst(int first) {
-            first= first;
+        public Builder mean(int mean) {
+            this.mean = mean;
             return this;
         }
 
-        public Builder withMean(int mean) {
-            mean = mean;
+
+        public Builder first(int first) {
+            this.first= first;
             return this;
         }
 
-        public Builder withMedian(int median) {
-            median = median;
+        public Builder median(int median) {
+            this.median = median;
             return this;
         }
 
-        public Builder withCount(int count) {
-            count = count;
+        public Builder last(int last) {
+            this.last = last;
             return this;
         }
 
-        public Builder withLast(int last) {
-            last = last;
+        public Builder count(int count) {
+            this.count = count;
             return this;
         }
+
 
         public DataPoint build() {
-            return new DataPoint(this.first, this.mean, this.median, this.last, this.count);
+            return new DataPoint(this);
         }
     }
 }

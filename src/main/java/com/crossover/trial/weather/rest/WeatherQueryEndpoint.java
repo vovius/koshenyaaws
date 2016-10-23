@@ -1,4 +1,6 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.rest;
+
+import com.crossover.trial.weather.data.AtmosphericInformation;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
