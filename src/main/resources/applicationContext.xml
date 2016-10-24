@@ -13,8 +13,14 @@
         </property>
     </bean>
 
+    <bean id="airport1" class="com.crossover.trial.weather.data.AirportData">
+        <property name="iata" value="BOS" />
+        <property name="latitude" value="42.364347" />
+        <property name="longitude" value="-71.005181" />
+    </bean>
+
     <util:list id="airportData" value-type="com.crossover.trial.weather.data.AirportData">
-        <value></value>
+        <ref bean="airport1" />
     </util:list>
 
     <bean id="restWeatherCollectorEndpoint" class="com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint" />
