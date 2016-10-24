@@ -2,15 +2,11 @@ package com.crossover.trial.weather.server;
 
 import com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint;
 import com.crossover.trial.weather.rest.RestWeatherQueryEndpoint;
-import com.crossover.trial.weather.spring.ApplicationConfig;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.http.server.*;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,13 +24,13 @@ public class WeatherServer {
 
     private final static Logger LOG = Logger.getLogger(WeatherServer.class);
 
-    @Value("${base_url}")
-    private String BASE_URL;
+    //@Value("${base_url}")
+    private String BASE_URL = "http://localhost:9090/";
 
-    @Value("${messageServerStarted}")
-    private String MESSAGE_SERVER_STARTED;
+    //@Value("${messageServerStarted}")
+    private String MESSAGE_SERVER_STARTED = "Weather Server started.\n url=%s\n";
 
-    public void init() {
+    public void start() {
         try {
             LOG.info("Starting Weather App local testing server: " + BASE_URL);
 
@@ -54,7 +50,6 @@ public class WeatherServer {
             };
             server.getServerConfiguration().getMonitoringConfig().getWebServerConfig().addProbes(probe);
 
-
             // the autograder waits for this output before running automated tests, please don't remove it
             server.start();
             LOG.info(format(MESSAGE_SERVER_STARTED, BASE_URL));
@@ -68,6 +63,7 @@ public class WeatherServer {
     }
 
     public static void main(String[] args) {
-        ApplicationContext ctx = new AnnotationConfigApplicationContext(ApplicationConfig.class);
+        WeatherServer server = new WeatherServer();
+        server.start();
     }
 }

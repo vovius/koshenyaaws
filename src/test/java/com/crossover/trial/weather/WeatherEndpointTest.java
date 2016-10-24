@@ -27,7 +27,7 @@ public class WeatherEndpointTest {
     private DataPoint _dp;
     @Before
     public void setUp() throws Exception {
-        RestWeatherQueryEndpoint.init();
+        //RestWeatherQueryEndpoint.init();
         _dp = new DataPoint.Builder()
                 .count(10).first(10).median(20).last(30).mean(22).build();
         _update.updateWeather("BOS", "wind", _gson.toJson(_dp));

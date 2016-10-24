@@ -6,6 +6,8 @@ import com.crossover.trial.weather.data.DataPoint;
 import com.crossover.trial.weather.data.DataPointType;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -20,12 +22,16 @@ import java.util.stream.Collectors;
  * @author code test administrator
  */
 
+@Component
 @Path("/collect")
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class);
 
     /** shared gson json to object factory */
     private final Gson gson = new Gson();
+
+    @Autowired
+    private RestWeatherQueryEndpoint restWeatherQueryEndpoint;
 
     @Override
     public Response ping() {
@@ -48,14 +54,14 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response getAirports() {
-        Set<String> retval = RestWeatherQueryEndpoint.getAirportData().stream().map(entry -> entry.getIata()).collect(Collectors.toSet());
+        Set<String> retval = restWeatherQueryEndpoint.getAirportData().stream().map(entry -> entry.getIata()).collect(Collectors.toSet());
         return Response.status(Response.Status.OK).entity(retval).build();
     }
 
 
     @Override
     public Response getAirport(@PathParam("iata") String iata) {
-        AirportData ad = RestWeatherQueryEndpoint.findAirportData(iata);
+        AirportData ad = restWeatherQueryEndpoint.findAirportData(iata);
         return Response.status(Response.Status.OK).entity(ad).build();
     }
 
@@ -93,8 +99,8 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
      * @throws WeatherException if the update can not be completed
      */
     public void addDataPoint(String iataCode, String pointType, DataPoint dp) throws WeatherException {
-        int airportDataIdx = RestWeatherQueryEndpoint.getAirportDataIdx(iataCode);
-        AtmosphericInformation ai = RestWeatherQueryEndpoint.getAtmosphericInformation().get(airportDataIdx);
+        int airportDataIdx = restWeatherQueryEndpoint.getAirportDataIdx(iataCode);
+        AtmosphericInformation ai = restWeatherQueryEndpoint.getAtmosphericInformation().get(airportDataIdx);
         updateAtmosphericInformation(ai, pointType, dp);
     }
 
@@ -167,10 +173,10 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
      */
     private AirportData addAirport(String iataCode, double latitude, double longitude) {
         AirportData ad = new AirportData();
-        RestWeatherQueryEndpoint.getAirportData().add(ad);
+        restWeatherQueryEndpoint.getAirportData().add(ad);
 
         AtmosphericInformation ai = new AtmosphericInformation();
-        RestWeatherQueryEndpoint.getAtmosphericInformation().add(ai);
+        restWeatherQueryEndpoint.getAtmosphericInformation().add(ai);
         ad.setIata(iataCode);
         ad.setLatitude(latitude);
         ad.setLatitude(longitude);

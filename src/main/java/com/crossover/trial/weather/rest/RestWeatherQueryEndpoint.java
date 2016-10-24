@@ -3,7 +3,10 @@ package com.crossover.trial.weather.rest;
 import com.crossover.trial.weather.data.AirportData;
 import com.crossover.trial.weather.data.AtmosphericInformation;
 import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -15,22 +18,24 @@ import java.util.logging.Logger;
  *
  * @author code test administrator
  */
+@Component
 @Path("/query")
 public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
     public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
 
     /** earth radius in KM */
-    private static final double R = 6372.8;
+    private final double R = 6372.8;
 
     /** shared gson json to object factory */
-    private static final Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     /** all known airports */
-    private static List<AirportData> airportData = new ArrayList<>();
+    @Autowired
+    private List<AirportData> airportData; // = new ArrayList<>();
 
     /** atmospheric information for each airport, idx corresponds with airportData */
-    private static List<AtmosphericInformation> atmosphericInformation = new LinkedList<>();
+    private List<AtmosphericInformation> atmosphericInformation = new LinkedList<>();
 
     /**
      * Internal performance counter to better understand most requested information, this map can be improved but
@@ -38,17 +43,17 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * we don't want to write this to disk, but will pull it off using a REST request and aggregate with other
      * performance metrics {@link #ping()}
      */
-    private static Map<AirportData, Integer> requestFrequency = new HashMap<AirportData, Integer>();
+    private Map<AirportData, Integer> requestFrequency = new HashMap<AirportData, Integer>();
 
-    private static Map<Double, Integer> radiusFreq = new HashMap<Double, Integer>();
+    private Map<Double, Integer> radiusFreq = new HashMap<Double, Integer>();
 
-    public static List<AtmosphericInformation> getAtmosphericInformation() {
+    public List<AtmosphericInformation> getAtmosphericInformation() {
         return atmosphericInformation;
     }
 
-    static {
-        init();
-    }
+//    static {
+//        init();
+//    }
     /**
      * Retrieve service health including total size of valid data points and request frequency information.
      *
@@ -149,7 +154,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * @param iataCode as a string
      * @return airport data or null if not found
      */
-    public static AirportData findAirportData(String iataCode) {
+    public AirportData findAirportData(String iataCode) {
         return airportData.stream()
             .filter(ap -> ap.getIata().equals(iataCode))
             .findFirst().orElse(null);
@@ -161,7 +166,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * @param iataCode as a string
      * @return airport data or null if not found
      */
-    public static int getAirportDataIdx(String iataCode) {
+    public int getAirportDataIdx(String iataCode) {
         AirportData ad = findAirportData(iataCode);
         return airportData.indexOf(ad);
     }
@@ -182,23 +187,23 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
         return R * c;
     }
 
-    public static List<AirportData> getAirportData() {
+    public List<AirportData> getAirportData() {
         return airportData;
     }
 
     /**
      * A dummy init method that loads hard coded data
      */
-    public static void init() {
-        airportData.clear();
-        atmosphericInformation.clear();
-        requestFrequency.clear();
-
-        RestWeatherCollectorEndpoint.addAirport("BOS", 42.364347, -71.005181);
-        RestWeatherCollectorEndpoint.addAirport("EWR", 40.6925, -74.168667);
-        RestWeatherCollectorEndpoint.addAirport("JFK", 40.639751, -73.778925);
-        RestWeatherCollectorEndpoint.addAirport("LGA", 40.777245, -73.872608);
-        RestWeatherCollectorEndpoint.addAirport("MMU", 40.79935, -74.4148747);
-    }
+//    public static void init() {
+//        airportData.clear();
+//        atmosphericInformation.clear();
+//        requestFrequency.clear();
+//
+//        RestWeatherCollectorEndpoint.addAirport("BOS", 42.364347, -71.005181);
+//        RestWeatherCollectorEndpoint.addAirport("EWR", 40.6925, -74.168667);
+//        RestWeatherCollectorEndpoint.addAirport("JFK", 40.639751, -73.778925);
+//        RestWeatherCollectorEndpoint.addAirport("LGA", 40.777245, -73.872608);
+//        RestWeatherCollectorEndpoint.addAirport("MMU", 40.79935, -74.4148747);
+//    }
 
 }
